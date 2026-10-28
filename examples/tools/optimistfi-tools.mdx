@@ -1,0 +1,61 @@
+---
+title: "OptimistFi"
+description: "Research perpetual futures funding, positioning and liquidation levels across venues with OptimistFiTools."
+---
+
+`OptimistFiTools` gives an agent perpetual futures, crypto prop firm and US company data functions. No API key is needed.
+
+```python optimistfi_tools.py
+from agno.agent import Agent
+from agno.models.openai import OpenAIResponses
+from agno.tools.optimistfi import OptimistFiTools
+
+agent = Agent(
+    name="Perps Research Agent",
+    model=OpenAIResponses(id="gpt-5.6-luna"),
+    tools=[OptimistFiTools()],
+    instructions=[
+        "Name the venue and the time of each figure you quote.",
+        "Treat the data as research context, not as trading advice.",
+    ],
+    markdown=True,
+)
+
+if __name__ == "__main__":
+    agent.print_response(
+        "Where is BTC funding highest right now, which way are Hyperliquid's largest accounts leaning, "
+        "and where would the most BTC positions be liquidated?"
+    )
+```
+
+## Run the Example
+
+<Steps>
+  <Snippet file="create-venv-step.mdx" />
+
+  <Step title="Install dependencies">
+    ```bash
+    uv pip install -U agno openai
+    ```
+  </Step>
+
+  <Step title="Export your API key">
+    <CodeGroup>
+    ```bash Mac/Linux
+    export OPENAI_API_KEY="***"
+    ```
+
+    ```bash Windows
+    $Env:OPENAI_API_KEY="***"
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Run the example">
+    ```bash
+    python optimistfi_tools.py
+    ```
+  </Step>
+</Steps>
+
+Full source: [cookbook/91_tools/optimistfi_tools.py](https://github.com/agno-agi/agno/blob/main/cookbook/91_tools/optimistfi_tools.py)

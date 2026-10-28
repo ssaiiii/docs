@@ -1,0 +1,85 @@
+---
+title: OptimistFi
+description: OptimistFiTools gives agents perpetual futures data across venues, crypto prop firm rules and prices, and US company insider trades and filings.
+---
+
+**OptimistFiTools** gives an Agent perpetual futures data from [OptimistFi](https://optimistfi.com/): funding, open interest, liquidation levels and big-account positioning across crypto, stock, index and commodity perps. It also reads crypto prop firm rules, challenge prices and discount codes, and US company insider trades, congressional trades and filings from SEC EDGAR.
+
+## Prerequisites
+
+No API key is needed. The toolkit calls OptimistFi's public MCP endpoint.
+
+```shell
+uv pip install -U agno openai
+```
+
+## Example
+
+```python cookbook/91_tools/optimistfi_tools.py
+from agno.agent import Agent
+from agno.models.openai import OpenAIResponses
+from agno.tools.optimistfi import OptimistFiTools
+
+agent = Agent(
+    name="Perps Research Agent",
+    model=OpenAIResponses(id="gpt-5.6-luna"),
+    tools=[OptimistFiTools()],
+    instructions=[
+        "Name the venue and the time of each figure you quote.",
+        "Treat the data as research context, not as trading advice.",
+    ],
+    markdown=True,
+)
+
+agent.print_response(
+    "Where is BTC funding highest right now, which way are Hyperliquid's largest accounts leaning, "
+    "and where would the most BTC positions be liquidated?"
+)
+```
+
+## Supported Data
+
+| Area | What it covers |
+| --- | --- |
+| Perpetual futures | One market across venues: price, premium, open interest, funding, maximum leverage, liquidation levels and positioning; its history over 1 to 90 days; 20 cross-market views such as funding extremes and gaps, trending open interest, liquidations, large trades, the lean of Hyperliquid accounts worth $1M or more, spot ETF flows, options, futures basis and a fear and greed index |
+| Prop firms | Rules, challenge prices, live discount codes, country, platforms and assets for firms that fund crypto and stock perps traders |
+| US companies | Form 4 insider trades, House trade disclosures, 8-K events, press releases, governance red flags and the next projected earnings date |
+
+Each function returns a JSON string. Insider trades carry both dates: `event_time` is the trade and `as_of` is the filing, when the trade became public.
+
+## Toolkit Params
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `base_url` | `str` | `"https://mcp.optimistfi.com/mcp"` | OptimistFi MCP endpoint. |
+| `timeout` | `float` | `60.0` | Per-request timeout in seconds. |
+| `enable_get_perp` | `bool` | `True` | Enable the single perp market function. |
+| `enable_get_perp_history` | `bool` | `True` | Enable the perp market history function. |
+| `enable_get_perps_market` | `bool` | `True` | Enable the cross-market perps function. |
+| `enable_get_prop_firms` | `bool` | `True` | Enable the prop firm function. |
+| `enable_get_insider_trades` | `bool` | `True` | Enable the insider trades function. |
+| `enable_get_congress_trades` | `bool` | `True` | Enable the congressional trades function. |
+| `enable_get_company_filings` | `bool` | `True` | Enable the company filings function. |
+| `enable_get_company_calendar` | `bool` | `True` | Enable the company calendar function. |
+| `all` | `bool` | `False` | Enable all functions regardless of individual flags. |
+
+## Toolkit Functions
+
+| Function | Description |
+| --- | --- |
+| `get_perp` | Get one perp market across venues right now. |
+| `get_perp_history` | Get one perp market over 1, 7, 30 or 90 days. |
+| `get_perps_market` | Get one view across perp markets: trending, movers, funding, funding_gaps, open_interest, liquidations, liquidation_max_pain, whales, lean, weekend, new_listings, market_overview, fear_greed, etf, sectors, exchanges, options, basis, premium or btc_cycle. A filter the view does not take is left out, and the result's `note` says so. |
+| `get_prop_firms` | Get prop firm rules, challenge prices and live discount codes, filtered by firm, account size, price, rule, asset or country. |
+| `get_insider_trades` | Get a US company's Form 4 insider transactions. |
+| `get_congress_trades` | Get US House stock-trade disclosures by ticker or member. |
+| `get_company_filings` | Get a US company's 8-K events, press releases, 8-K text or governance red flags. |
+| `get_company_calendar` | Get a US company's next projected earnings date and clinical trial readouts. |
+
+The toolkit maps these functions to asynchronous implementations when used by an asynchronous Agent.
+
+## Developer Resources
+
+- [OptimistFi MCP](https://optimistfi.com/mcp)
+- [Tools](https://github.com/agno-agi/agno/blob/main/libs/agno/agno/tools/optimistfi.py)
+- [Cookbook example](https://github.com/agno-agi/agno/blob/main/cookbook/91_tools/optimistfi_tools.py)
